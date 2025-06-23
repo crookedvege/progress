@@ -22,6 +22,11 @@ exports.handler = async function () {
       res.on('end', () => {
         const record = JSON.parse(data);
         const fields = record.fields || {};
+
+        const current = fields['Donation Value Rollup (from Table 1)'] || 0;
+        const goal = fields.Goal || 1; // Avoid divide-by-zero
+        const progress = current / goal;
+
         resolve({
           statusCode: 200,
           headers: {
@@ -29,9 +34,9 @@ exports.handler = async function () {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            progress: fields.Progress || 0,
-            current: fields['Donation Value Rollup (from Table 1)'] || 0,
-            goal: fields.Goal || 0
+            progress,
+            current,
+            goal
           })
         });
       });
