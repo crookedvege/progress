@@ -1,40 +1,29 @@
+export async function handler(event, context) {
+  const fetch = (await import('node-fetch')).default;
 
-const fetch = require('node-fetch');
-
-exports.handler = async function(event, context) {
   const AIRTABLE_PAT = process.env.AIRTABLE_PAT;
-  const BASE_ID = "appWPBQxrTk0Z2Knj";
-  const TABLE_NAME = "Progress";
-  const RECORD_ID = "recXwynFh17wbdqJs";
+  const baseId = "tblmFK7XawakfKQyM";
+  const tableName = "Progress";
+  const recordId = "appWPBQxrTk0Z2Knj";
 
-  const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}/${RECORD_ID}`;
+  const url = `https://api.airtable.com/v0/${baseId}/${tableName}/${recordId}`;
 
   try {
-    const response = await fetch(url, {
+    const res = await fetch(url, {
       headers: {
         Authorization: `Bearer ${AIRTABLE_PAT}`
       }
     });
-
-    if (!response.ok) {
-      throw new Error("Airtable request failed");
-    }
-
-    const data = await response.json();
-    const fields = data.fields;
+    const data = await res.json();
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        progress: fields["Progress"],
-        current: fields["Donation Value Rollup (from Table 1)"],
-        goal: fields["Goal"]
-      })
+      body: JSON.stringify(data)
     };
   } catch (err) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to load data" })
+      body: JSON.stringify({ error: "Failed to load data", details: err.message })
     };
   }
-};
+}
