@@ -2,9 +2,9 @@ export async function handler(event, context) {
   const fetch = (await import('node-fetch')).default;
 
   const AIRTABLE_PAT = process.env.AIRTABLE_PAT;
-  const baseId = "tblmFK7XawakfKQyM";
+  const baseId = "appk98eTxLtQ2i8Mc";  // 
   const tableName = "Progress";
-  const recordId = "appWPBQxrTk0Z2Knj";
+  const recordId = "recXwynFh17wbdqJs";
 
   const url = `https://api.airtable.com/v0/${baseId}/${tableName}/${recordId}`;
 
@@ -14,8 +14,8 @@ export async function handler(event, context) {
         Authorization: `Bearer ${AIRTABLE_PAT}`
       }
     });
-    const data = await res.json();
 
+    const data = await res.json();
     return {
       statusCode: 200,
       body: JSON.stringify(data)
