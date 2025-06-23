@@ -1,29 +1,49 @@
-export async function handler(event, context) {
-  const fetch = (await import('node-fetch')).default;
+const https = require('https');
 
-  const AIRTABLE_PAT = process.env.AIRTABLE_PAT;
-  const baseId = "appk98eTxLtQ2i8Mc";  // 
-  const tableName = "Progress";
-  const recordId = "recXwynFh17wbdqJs";
+exports.handler = async function () {
+  const apiKey = process.env.AIRTABLE_PAT;
+  const baseId = 'appk98eTxLtQ2i8Mc';
+  const table = 'Progress';
+  const recordId = 'recXwynFh17wbdqJs';
 
-  const url = `https://api.airtable.com/v0/${baseId}/${tableName}/${recordId}`;
+  const options = {
+    hostname: 'api.airtable.com',
+    path: `/v0/${baseId}/${table}/${recordId}`,
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${apiKey}`
+    }
+  };
 
-  try {
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${AIRTABLE_PAT}`
-      }
+  return new Promise((resolve) => {
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => (data += chunk));
+      res.on('end', () => {
+        const record = JSON.parse(data);
+        const fields = record.fields || {};
+        resolve({
+          statusCode: 200,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            progress: fields.Progress || 0,
+            current: fields['Donation Value Rollup (from Table 1)'] || 0,
+            goal: fields.Goal || 0
+          })
+        });
+      });
     });
 
-    const data = await res.json();
-    return {
-      statusCode: 200,
-      body: JSON.stringify(data)
-    };
-  } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Failed to load data", details: err.message })
-    };
-  }
-}
+    req.on('error', (err) => {
+      resolve({
+        statusCode: 500,
+        body: JSON.stringify({ error: err.message })
+      });
+    });
+
+    req.end();
+  });
+};
