@@ -37,3 +37,49 @@
 
     .bar-fill {
       background: #f9ca24;
+      height: 100%;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    .numbers {
+      font-size: 1rem;
+      text-align: right;
+    }
+
+    .error {
+      color: red;
+      margin-top: 16px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="label">Progress</div>
+    <div class="bar-bg">
+      <div id="bar-fill" class="bar-fill"></div>
+    </div>
+    <div id="numbers" class="numbers"></div>
+    <div id="error" class="error"></div>
+  </div>
+
+  <script>
+    fetch('/.netlify/functions/getProgress')
+      .then(res => res.json())
+      .then(data => {
+        if (!data || !data.total || !data.goal) {
+          throw new Error("Invalid data");
+        }
+
+        const percent = (data.total / data.goal) * 100;
+        document.getElementById('bar-fill').style.width = percent + '%';
+        document.getElementById('numbers').textContent = `${data.total} / ${data.goal} (${Math.round(percent)}%)`;
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('error').textContent = 'Failed to load data.';
+      });
+  </script>
+</body>
+</html>
