@@ -3,36 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Live Progress</title>
+  <title>Progress</title>
   <style>
     body {
       font-family: sans-serif;
-      background: #f5f5f5;
-      padding: 40px;
+      margin: 0;
+      padding: 0;
+      background: transparent;
       color: #333;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: white;
-      padding: 24px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .label {
-      font-size: 1.25rem;
-      font-weight: bold;
-      margin-bottom: 8px;
     }
 
     .bar-bg {
       background: #e0e0e0;
       border-radius: 8px;
       overflow: hidden;
-      height: 24px;
+      height: 20px;
       position: relative;
+      width: 100%;
     }
 
     .bar-fill {
@@ -46,28 +33,26 @@
     .bar-text {
       position: absolute;
       right: 8px;
-      top: 2px;
-      font-size: 0.9rem;
+      top: 1px;
+      font-size: 0.85rem;
       font-weight: bold;
       color: #333;
     }
 
     .summary {
-      margin-top: 12px;
-      font-size: 1rem;
-      text-align: center;
+      margin-top: 6px;
+      font-size: 0.9rem;
+      text-align: left;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="bar-bg">
-      <div class="bar-fill" id="bar-fill">
-        <div class="bar-text" id="bar-text">0%</div>
-      </div>
+  <div class="bar-bg">
+    <div class="bar-fill" id="bar-fill">
+      <div class="bar-text" id="bar-text">0%</div>
     </div>
-    <div class="summary" id="summary">Loading...</div>
   </div>
+  <div class="summary" id="summary">Loading...</div>
 
   <script>
     async function fetchProgress() {
@@ -86,7 +71,6 @@
         barFill.style.width = `${percent}%`;
         barText.textContent = `${percent}%`;
 
-        // Push the percentage to the edge of yellow bar or pin to right if bar is too short
         if (percent < 15) {
           barText.style.right = '-40px';
           barText.style.color = '#666';
