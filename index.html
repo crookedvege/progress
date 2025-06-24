@@ -24,14 +24,14 @@
     .label {
       font-size: 1.25rem;
       font-weight: bold;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .bar-bg {
       background: #e0e0e0;
       border-radius: 8px;
       overflow: hidden;
-      height: 30px;
+      height: 24px;
       position: relative;
     }
 
@@ -39,23 +39,23 @@
       background: #f9ca24;
       height: 100%;
       width: 0%;
-      transition: width 0.5s ease;
+      transition: width 0.6s ease;
       position: relative;
     }
 
     .bar-text {
       position: absolute;
       right: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-weight: bold;
+      top: 2px;
       font-size: 0.9rem;
-      color: #000;
+      font-weight: bold;
+      color: #333;
     }
 
     .summary {
-      margin-top: 10px;
-      font-size: 1.1rem;
+      margin-top: 12px;
+      font-size: 1rem;
+      text-align: center;
     }
   </style>
 </head>
@@ -63,4 +63,47 @@
   <div class="container">
     <div class="label">Fundraising Progress</div>
     <div class="bar-bg">
-      <div class="bar-fill" id="bar-fill
+      <div class="bar-fill" id="bar-fill">
+        <div class="bar-text" id="bar-text">0%</div>
+      </div>
+    </div>
+    <div class="summary" id="summary">Loading...</div>
+  </div>
+
+  <script>
+    async function fetchProgress() {
+      try {
+        const response = await fetch('/.netlify/functions/getProgress');
+        const data = await response.json();
+        console.log("Fetched data:", data);
+
+        const percent = Math.round(data.progress * 100);
+        const total = data.total.toLocaleString();
+        const goal = data.goal.toLocaleString();
+
+        const barFill = document.getElementById('bar-fill');
+        const barText = document.getElementById('bar-text');
+
+        barFill.style.width = `${percent}%`;
+        barText.textContent = `${percent}%`;
+
+        // Push the percentage to the edge of yellow bar or pin to right if bar is too short
+        if (percent < 15) {
+          barText.style.right = '-40px';
+          barText.style.color = '#666';
+        } else {
+          barText.style.right = '8px';
+          barText.style.color = '#333';
+        }
+
+        document.getElementById('summary').textContent = `$${total} raised of $${goal} goal!`;
+      } catch (err) {
+        console.error("Fetch error:", err);
+        document.getElementById('summary').textContent = '⚠ Failed to load progress.';
+      }
+    }
+
+    fetchProgress();
+  </script>
+</body>
+</html>
