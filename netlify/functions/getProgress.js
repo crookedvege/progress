@@ -1,54 +1,51 @@
 const https = require('https');
 
-exports.handler = async function () {
-  const apiKey = process.env.AIRTABLE_PAT;
-  const baseId = 'appk98eTxLtQ2i8Mc';
-  const table = 'Progress';
-  const recordId = 'recXwynFh17wbdqJs';
+exports.handler = async function (event, context) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'api.airtable.com',
+      path: '/v0/tblmFK7XawakfKQyM/Progress/recXwynFh17wbdqJs',
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${process.env.AIRTABLE_PAT}`
+      }
+    };
 
-  const options = {
-    hostname: 'api.airtable.com',
-    path: `/v0/${baseId}/${table}/${recordId}`,
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${apiKey}`
-    }
-  };
-
-  return new Promise((resolve) => {
     const req = https.request(options, (res) => {
       let data = '';
-      res.on('data', (chunk) => (data += chunk));
+
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+
       res.on('end', () => {
         try {
           const record = JSON.parse(data);
-          const fields = record.fields || {};
 
+          // 🪵 Return the raw Airtable fields for debugging
           resolve({
             statusCode: 200,
             headers: {
               'Access-Control-Allow-Origin': '*',
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-              progress: fields.Progress ?? null,
-              current: fields['Donation Value Rollup (from Table 1)'] ?? null,
-              goal: fields.Goal ?? null
-            })
+            body: JSON.stringify(record.fields, null, 2)  // Pretty print
           });
         } catch (err) {
-          resolve({
+          console.error('Error parsing Airtable response:', err);
+          reject({
             statusCode: 500,
-            body: JSON.stringify({ error: 'Error parsing Airtable response', details: err.message })
+            body: JSON.stringify({ error: 'Failed to parse Airtable response' })
           });
         }
       });
     });
 
     req.on('error', (err) => {
-      resolve({
+      console.error('Request error:', err);
+      reject({
         statusCode: 500,
-        body: JSON.stringify({ error: err.message })
+        body: JSON.stringify({ error: 'Request failed' })
       });
     });
 
